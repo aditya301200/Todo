@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import {
   FaRegCircle,
   FaRegCheckCircle,
@@ -21,6 +22,7 @@ const App = () => {
       .then((res) => {
         setNote("");
         getAllTodo();
+        toast.success("Note Created Successfully");
       })
       .catch((err) => console.log(err));
   };
@@ -31,7 +33,7 @@ const App = () => {
     createnote(note);
   };
 
-  const editHandler = (id,text) => {
+  const editHandler = (id, text) => {
     setEditId(id);
     setEditedNote(text);
     setIsEditable(true);
@@ -43,11 +45,12 @@ const App = () => {
       .put(`${import.meta.env.VITE_API_URL}/update/${id}`, {
         text: editedNote,
       })
-      .then((res) =>{
-        setEditId("")
-        setEditedNote("")
-        setIsEditable("")
-        getAllTodo()
+      .then((res) => {
+        setEditId("");
+        setEditedNote("");
+        setIsEditable("");
+        getAllTodo();
+        toast.success("Note Updated Successfully");
       })
       .catch((err) => console.log(err));
   };
@@ -100,7 +103,7 @@ const App = () => {
               {isEditable && editId === item._id ? (
                 <form
                   className="w-full justify-between flex"
-                  onSubmit={(e) => editSubmit(item._id,e)}
+                  onSubmit={(e) => editSubmit(item._id, e)}
                 >
                   <input
                     type="text"
@@ -129,6 +132,13 @@ const App = () => {
                           .then((res) => {
                             console.log(res.data.data.completed);
                             getAllTodo();
+                            toast.error("Note Marked as Incomplete", {
+                              style: {
+                                borderRadius: "10px",
+                                background: "#333",
+                                color: "#fff",
+                              },
+                            });
                           })
                           .catch((err) => console.log(err))
                       }
@@ -149,6 +159,13 @@ const App = () => {
                           .then((res) => {
                             console.log(res.data.data.completed);
                             getAllTodo();
+                            toast.success("Note Marked as Completed", {
+                              style: {
+                                borderRadius: "10px",
+                                background: "#333",
+                                color: "#fff",
+                              },
+                            });
                           })
                           .catch((err) => console.log(err))
                       }
@@ -187,6 +204,13 @@ const App = () => {
                         .then((res) => {
                           console.log(res.data.data);
                           getAllTodo();
+                          toast.success("Note Deleted Successfully", {
+                            style: {
+                              borderRadius: "10px",
+                              background: "#ef4444",
+                              color: "#fff",
+                            },
+                          });
                         })
                         .catch((err) => console.log(err))
                     }
