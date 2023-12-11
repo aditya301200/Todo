@@ -11,6 +11,9 @@ import { MdDeleteOutline, MdOutlineNoteAdd } from "react-icons/md";
 const App = () => {
   const [note, setNote] = useState("");
   const [todo, setTodo] = useState([]);
+  const [isEditable, setIsEditable] = useState(false);
+  const [editId, setEditId] = useState("");
+  const [editedNote, setEditedNote] = useState();
 
   const createnote = (note) => {
     axios
@@ -26,6 +29,27 @@ const App = () => {
     e.preventDefault();
     console.log(note);
     createnote(note);
+  };
+
+  const editHandler = (id,text) => {
+    setEditId(id);
+    setEditedNote(text);
+    setIsEditable(true);
+  };
+
+  const editSubmit = (id, e) => {
+    e.preventDefault();
+    axios
+      .put(`${import.meta.env.VITE_API_URL}/update/${id}`, {
+        text: editedNote,
+      })
+      .then((res) =>{
+        setEditId("")
+        setEditedNote("")
+        setIsEditable("")
+        getAllTodo()
+      })
+      .catch((err) => console.log(err));
   };
 
   const getAllTodo = () => {
@@ -73,49 +97,83 @@ const App = () => {
               key={item._id}
               className="flex text-slate-200 bg-slate-800 w-[50%] my-2 py-2 px-3 rounded-lg"
             >
-              {item.completed ? (
-                <button
-                  className="text-green-500 text-xl mx-2"
-                  onClick={() =>
-                    axios
-                      .put(
-                        `${import.meta.env.VITE_API_URL}/update/${item._id}`,
-                        { completed: !item.completed },
-                      )
-                      .then((res) => {
-                        console.log(res.data.data.completed);
-                        getAllTodo();
-                      })
-                      .catch((err) => console.log(err))
-                  }
+              {isEditable && editId === item._id ? (
+                <form
+                  className="w-full justify-between flex"
+                  onSubmit={(e) => editSubmit(item._id,e)}
                 >
-                  <FaRegCheckCircle />
-                </button>
+                  <input
+                    type="text"
+                    name="editText"
+                    value={editedNote}
+                    onChange={(e) => setEditedNote(e.target.value)}
+                    className="w-[95%] text-white bg-transparent outline-none border border-1 border-slate-600 px-2 py-2 rounded-md"
+                  />
+                  <button className="text-xl mx-2 text-emerald-400">
+                    <FaRegSave />
+                  </button>
+                </form>
               ) : (
-                <button
-                  className="text-green-500 text-xl mx-2"
-                  onClick={() =>
-                    axios
-                      .put(
-                        `${import.meta.env.VITE_API_URL}/update/${item._id}`,
-                        { completed: !item.completed },
-                      )
-                      .then((res) => {
-                        console.log(res.data.data.completed);
-                        getAllTodo();
-                      })
-                      .catch((err) => console.log(err))
-                  }
-                >
-                  <FaRegCircle />
-                </button>
-              )}
+                <div className="flex w-full">
+                  {item.completed ? (
+                    <button
+                      className="text-green-500 text-xl mx-2"
+                      onClick={() =>
+                        axios
+                          .put(
+                            `${import.meta.env.VITE_API_URL}/update/${
+                              item._id
+                            }`,
+                            { completed: !item.completed },
+                          )
+                          .then((res) => {
+                            console.log(res.data.data.completed);
+                            getAllTodo();
+                          })
+                          .catch((err) => console.log(err))
+                      }
+                    >
+                      <FaRegCheckCircle />
+                    </button>
+                  ) : (
+                    <button
+                      className="text-green-500 text-xl mx-2"
+                      onClick={() =>
+                        axios
+                          .put(
+                            `${import.meta.env.VITE_API_URL}/update/${
+                              item._id
+                            }`,
+                            { completed: !item.completed },
+                          )
+                          .then((res) => {
+                            console.log(res.data.data.completed);
+                            getAllTodo();
+                          })
+                          .catch((err) => console.log(err))
+                      }
+                    >
+                      <FaRegCircle />
+                    </button>
+                  )}
 
-              <p
-                className={`w-[90%] ${item.completed ? "text-slate-400" : ""}`}
-              >
-                {item.text}
-              </p>
+                  <div className="flex justify-between w-full">
+                    <p
+                      className={`w-[90%] ${
+                        item.completed ? "text-slate-400" : ""
+                      }`}
+                    >
+                      {item.text}
+                    </p>
+                    <button
+                      className="text-fuchsia-500 text-xl mx-2"
+                      onClick={() => editHandler(item._id, item.text)}
+                    >
+                      <FaEdit />
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <div className="flex justify-between">
                 {
